@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+<title>Login e Cadastro - Projeto Social</title>
+
+<style>
+  body {
+    font-family: Arial;
+    background: #f2f2f2;
+    text-align: center;
+  }
+
+  .box {
+    background: white;
+    width: 320px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+  }
+
+  input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px;
+  }
+
+  button {
+    padding: 10px;
+    width: 95%;
+    background: #67ad5b;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .link {
+    margin-top: 10px;
+    cursor: pointer;
+    color: blue;
+  }
+
+  a {
+    color: blue;
+    text-decoration: none;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Projeto Social</h1>
+
+<div class="box" id="login">
+  <h2>Login</h2>
+
+  <input type="text" id="emailLogin" placeholder="E-mail">
+  <input type="password" id="senhaLogin" placeholder="Senha">
+
+  <button onclick="entrar()">Entrar</button>
+
+  <p id="msgLogin"></p>
+
+  <div class="link" onclick="mostrarCadastro()">Criar cadastro</div>
+  <p><a href="inicio.html">Voltar para início</a></p>
+</div>
+
+<div class="box" id="cadastro" style="display:none;">
+  <h2>Cadastro</h2>
+
+  <input type="text" id="nomeCad" placeholder="Nome">
+  <input type="text" id="emailCad" placeholder="E-mail">
+  <input type="password" id="senhaCad" placeholder="Senha">
+
+  <button onclick="cadastrar()">Cadastrar</button>
+
+  <p id="msgCad"></p>
+
+  <div class="link" onclick="mostrarLogin()">Já tenho conta</div>
+</div>
+
+<script>
+  function mostrarCadastro() {
+    login.style.display = "none";
+    cadastro.style.display = "block";
+  }
+
+  function mostrarLogin() {
+    login.style.display = "block";
+    cadastro.style.display = "none";
+  }
+
+  function cadastrar() {
+    var nome = nomeCad.value;
+    var email = emailCad.value;
+    var senha = senhaCad.value;
+
+    if (nome == "" || email == "" || senha == "") {
+      msgCad.innerHTML = "Preencha todos os campos";
+      msgCad.style.color = "red";
+    } else {
+      fetch("/usuarios/cadastrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nome: nome,
+          email: email,
+          senha: senha
+        })
+      }).then(function(resposta) {
+        if (resposta.ok) {
+          msgCad.innerHTML = "Cadastro realizado";
+          msgCad.style.color = "green";
+        } else {
+          msgCad.innerHTML = "Erro ao cadastrar";
+          msgCad.style.color = "red";
+        }
+      });
+    }
+  }
+
+  function entrar() {
+    var email = emailLogin.value;
+    var senha = senhaLogin.value;
+
+    if (email == "" || senha == "") {
+      msgLogin.innerHTML = "Preencha todos os campos";
+      msgLogin.style.color = "red";
+    } else {
+      fetch("/usuarios/autenticar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email,
+          senha: senha
+        })
+      }).then(function(resposta) {
+        if (resposta.ok) {
+          resposta.json().then(function(usuario) {
+            sessionStorage.setItem("ID_USUARIO", usuario.idUsuario);
+            sessionStorage.setItem("NOME_USUARIO", usuario.nome);
+
+            msgLogin.innerHTML = "Login feito";
+            msgLogin.style.color = "green";
+
+            window.location = "dash.html";
+          });
+        } else {
+          msgLogin.innerHTML = "E-mail ou senha errado";
+          msgLogin.style.color = "red";
+        }
+      });
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+<title>Formulário - Projeto Social</title>
+
+<style>
+  body {
+    font-family: Arial;
+    background: #eeeeee;
+    text-align: center;
+  }
+
+  .topo {
+    background: linear-gradient(135deg, #2563eb, #14b8a6);
+    color: white;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .forms {
+    background: white;
+    width: 420px;
+    margin: 40px auto;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    box-shadow: rgb(15 15 20) 4px 5px 18px -2px;
+  }
+
+  input, select {
+    width: 90%;
+    padding: 12px;
+    margin: 8px;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: thin;
+  }
+
+  .checkbox {
+    text-align: left;
+    margin-left: 25px;
+    margin-top: 8px;
+  }
+
+  .checkbox input {
+    width: auto;
+  }
+
+  button {
+    width: 95%;
+    padding: 12px;
+    background: #67ad5b;
+    color: white;
+    border: 0;
+    font-size: 16px;
+  }
+
+  a {
+    color: blue;
+    text-decoration: none;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="topo"> 
+  <h1>Social Project</h1>
+  <p>Conte sua experiência ou opinião sobre projetos sociais</p>
+</div>
+
+<div class="forms">
+
+  <label>Nome</label>
+  <input id="nome">
+
+  <label>Idade</label>
+  <input id="idade" type="number">
+
+  <label>Bairro ou cidade</label>
+  <input id="bairro">
+
+  <select id="conhece">
+    <option value="">Você conhece alguém que precisa de ajuda social?</option>
+    <option value="Sim">Sim</option>
+    <option value="Não">Não</option>
+  </select>
+
+  <h3>Qual projeto social você participa?</h3>
+
+  <div class="checkbox">
+    <input type="checkbox" id="nenhum">
+    Nenhum
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="animais">
+    Área de animais
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="idosos">
+    Apoio a idosos
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="rua">
+    Pessoas em situação de rua
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="criancas">
+    Apoio a crianças
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="alimentos">
+    Doação de alimentos
+  </div>
+
+  <div class="checkbox">
+    <input type="checkbox" id="educacao">
+    Educação comunitária
+  </div>
+
+  <select id="frequencia">
+    <option value="">Com que frequência você vê essa situação?</option>
+    <option value="Poucas vezes">Poucas vezes</option>
+    <option value="Às vezes">Às vezes</option>
+    <option value="Muitas vezes">Muitas vezes</option>
+  </select>
+
+  <input id="mensagemUsuario" placeholder="Mensagem curta">
+
+  <button onclick="enviar()">Enviar</button>
+
+  <p id="mensagem"></p>
+
+  <p><a href="dash.html">Ver dashboard</a></p>
+  <p><a href="inicio.html">Voltar para início</a></p>
+</div>
+
+<script>
+  function enviar() {
+
+    var nomeDigitado = nome.value;
+    var idadeDigitada = Number(idade.value);
+    var bairroDigitado = bairro.value;
+    var conheceDigitado = conhece.value;
+    var frequenciaDigitada = frequencia.value;
+    var textoDigitado = mensagemUsuario.value;
+
+    var projetoIds = [];
+
+    if (nenhum.checked) {
+      projetoIds.push(1);
+    }
+
+    if (animais.checked) {
+      projetoIds.push(2);
+    }
+
+    if (idosos.checked) {
+      projetoIds.push(3);
+    }
+
+    if (rua.checked) {
+      projetoIds.push(4);
+    }
+
+    if (criancas.checked) {
+      projetoIds.push(5);
+    }
+
+    if (alimentos.checked) {
+      projetoIds.push(6);
+    }
+
+    if (educacao.checked) {
+      projetoIds.push(7);
+    }
+
+    if (
+      nomeDigitado == "" ||
+      idadeDigitada == 0 ||
+      bairroDigitado == "" ||
+      conheceDigitado == "" ||
+      projetoIds.length == 0 ||
+      frequenciaDigitada == "" ||
+      textoDigitado == ""
+    ) {
+
+      mensagem.innerHTML = "Preencha todos os campos";
+      mensagem.style.color = "red";
+
+    } else {
+
+      if (sessionStorage.ID_USUARIO == undefined) {
+
+        mensagem.innerHTML = "Você precisa fazer login";
+        mensagem.style.color = "red";
+
+      } else {
+
+        fetch("/respostas/cadastrar", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            fkUsuario: sessionStorage.ID_USUARIO,
+            conheceAjuda: conheceDigitado,
+            frequencia: frequenciaDigitada,
+            mensagem: textoDigitado,
+            projetos: projetoIds
+          })
+
+        })
+
+        .then(function(resposta) {
+
+          if (resposta.ok) {
+
+            mensagem.innerHTML = "Resposta enviada para o banco";
+            mensagem.style.color = "green";
+
+            nome.value = "";
+            idade.value = "";
+            bairro.value = "";
+            conhece.value = "";
+            frequencia.value = "";
+            mensagemUsuario.value = "";
+
+            nenhum.checked = false;
+            animais.checked = false;
+            idosos.checked = false;
+            rua.checked = false;
+            criancas.checked = false;
+            alimentos.checked = false;
+            educacao.checked = false;
+
+          } else {
+
+            mensagem.innerHTML = "Erro ao enviar";
+            mensagem.style.color = "red";
+
+          }
+
+        });
+
+      }
+
+    }
+
+  }
+</script>
+
+</body>
+</html>
+  

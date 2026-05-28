@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Projeto Social</title>
+
+<style>
+  body {
+    font-family: Arial;
+    background: #eeeeee;
+    text-align: center;
+  }
+
+  .caixa {
+    background: white;
+    width: 900px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    border: 1px solid #cccccc;
+    margin: 10px;
+    padding: 15px;
+    width: 200px;
+    background: #fafafa;
+    border-radius: 8px;
+  }
+
+  .numero {
+    font-size: 28px;
+    font-weight: bold;
+    color: #67ad5b;
+  }
+
+  .pequeno {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333333;
+  }
+
+  .grafico {
+    width: 80%;
+    margin: 30px auto;
+  }
+
+  .linha {
+    margin-top: 18px;
+    text-align: left;
+  }
+
+  .barra {
+    width: 100%;
+    height: 28px;
+    background: #dddddd;
+    border-radius: 8px;
+    margin-top: 5px;
+  }
+
+  .valor {
+  height: 28px;
+  width: 0px;
+  background: #67ad5b;
+  border-radius: 8px;
+}
+
+  table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #cccccc;
+    padding: 8px;
+  }
+
+  a {
+    color: blue;
+    text-decoration: none;
+  }
+</style>
+</head>
+
+<body onload="calcular()">
+
+<h1>Dashboard</h1>
+
+<div class="caixa">
+
+  <h2>Dados do Projeto Social</h2>
+
+  <div class="cards">
+    <div class="card">
+      <p>Total de respostas</p>
+      <div class="numero" id="total">0</div>
+    </div>
+
+    <div class="card">
+      <p>Conhecem alguém que precisa de ajuda</p>
+      <div class="numero" id="conheceSim">0</div>
+    </div>
+
+    <div class="card">
+      <p>Porcentagem que respondeu SIM</p>
+      <div class="numero" id="porcentagem">0%</div>
+    </div>
+  </div>
+
+  <div class="card" style="width:80%; margin:20px auto;">
+    <p>Indicador principal</p>
+    <div class="pequeno" id="frase">Sem dados ainda</div>
+  </div>
+
+  <h2>Projetos sociais mais citados</h2>
+
+  <div class="grafico">
+
+    <div class="linha">
+      <span>Área de animais</span>
+      <div class="barra">
+        <div class="valor" id="barraAnimais"></div>
+      </div>
+    </div>
+
+    <div class="linha">
+      <span>Apoio a idosos</span>
+      <div class="barra">
+        <div class="valor" id="barraIdosos"></div>
+      </div>
+    </div>
+
+    <div class="linha">
+      <span>Pessoas em situação de rua</span>
+      <div class="barra">
+        <div class="valor" id="barraRua"></div>
+      </div>
+    </div>
+
+    <div class="linha">
+      <span>Apoio a crianças</span>
+      <div class="barra">
+        <div class="valor" id="barraCriancas"></div>
+      </div>
+    </div>
+
+    <div class="linha">
+      <span>Doação de alimentos</span>
+      <div class="barra">
+        <div class="valor" id="barraAlimentos"></div>
+      </div>
+    </div>
+
+    <div class="linha">
+      <span>Educação comunitária</span>
+      <div class="barra">
+        <div class="valor" id="barraEducacao"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>Respostas cadastradas</h2>
+
+  <table>
+    <tr>
+      <th>Nome</th>
+      <th>Conhece</th>
+      <th>Projetos</th>
+      <th>Frequência</th>
+      <th>Mensagem</th>
+    </tr>
+    <tbody id="tabela"></tbody>
+  </table>
+
+  <p><a href="forms.html">Voltar para formulário</a></p>
+  <p><a href="inicio.html">Voltar para início</a></p>
+</div>
+
+<script>
+  function calcular() {
+
+    fetch("/respostas/listar")
+
+    .then(function(resposta) {
+
+      resposta.json().then(function(dados) {
+
+        var totalRespostas = dados.length;
+        var totalSim = 0;
+        var linhas = "";
+
+        if (totalRespostas == 0) {
+
+          total.innerHTML = 0;
+          conheceSim.innerHTML = 0;
+          porcentagem.innerHTML = "0%";
+          frase.innerHTML = "Ainda não tem respostas no formulário";
+
+        } else {
+
+          for (var i = 0; i < dados.length; i++) {
+
+            if (dados[i].conheceAjuda == "Sim") {
+              totalSim = totalSim + 1;
+            }
+
+            linhas = linhas +
+              "<tr>" +
+              "<td>" + dados[i].nome + "</td>" +
+              "<td>" + dados[i].conheceAjuda + "</td>" +
+              "<td>" + dados[i].projetos + "</td>" +
+              "<td>" + dados[i].frequencia + "</td>" +
+              "<td>" + dados[i].mensagem + "</td>" +
+              "</tr>";
+          }
+
+          var porcento = totalSim * 100 / totalRespostas;
+
+          total.innerHTML = totalRespostas;
+          conheceSim.innerHTML = totalSim;
+          porcentagem.innerHTML = porcento.toFixed(0) + "%";
+
+          if (totalSim == 0) {
+
+            frase.innerHTML = "Nenhuma pessoa marcou SIM ainda";
+
+          } else {
+
+            var cada = totalRespostas / totalSim;
+
+            frase.innerHTML =
+              "1 a cada " +
+              cada.toFixed(1) +
+              " pessoas conhece alguém que precisa de ajuda social";
+          }
+
+          tabela.innerHTML = linhas;
+        }
+
+      });
+
+    });
+
+    barraAnimais.style.width = "0px";
+    barraIdosos.style.width = "0px";
+    barraRua.style.width = "0px";
+    barraCriancas.style.width = "0px";
+    barraAlimentos.style.width = "0px";
+    barraEducacao.style.width = "0px";
+
+    fetch("/respostas/listarProjetos")
+
+    .then(function(resposta) {
+
+      resposta.json().then(function(projetos) {
+
+        for (var i = 0; i < projetos.length; i++) {
+
+          if (projetos[i].nome == "Área de animais") {
+            barraAnimais.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+          if (projetos[i].nome == "Apoio a idosos") {
+            barraIdosos.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+          if (projetos[i].nome == "Pessoas em situação de rua") {
+            barraRua.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+          if (projetos[i].nome == "Apoio a crianças") {
+            barraCriancas.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+          if (projetos[i].nome == "Doação de alimentos") {
+            barraAlimentos.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+          if (projetos[i].nome == "Educação comunitária") {
+            barraEducacao.style.width = projetos[i].qtd * 40 + "px";
+          }
+
+        }
+
+      });
+
+    });
+
+  }
+</script>
+
+</body>
+</html>
